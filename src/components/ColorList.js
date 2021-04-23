@@ -24,24 +24,28 @@ const ColorList = ({ colors, updateColors }) => {
     axiosWithAuth()
       .put(`/colors/${colorToEdit.id}`, colorToEdit)
       .then((res) => {
-        const updatedArray = colors.filter(
-          (color) => color.id !== colorToEdit.id
-        );
-        updateColors([...updatedArray, colorToEdit]);
-        setEditing(false);
+        console.log(res.data);
+        axiosWithAuth()
+          .get("/colors")
+          .then((response) => {
+            console.log(response.data);
+            updateColors(response.data);
+          });
       })
-      .catch((err) => console.log({ err }));
+      .catch((err) => {
+        console.log(err.response);
+      });
   };
 
   const deleteColor = (color) => {
     axiosWithAuth()
       .delete(`/colors/${color.id}`)
       .then((res) => {
-        const colorToDelete = colors.filter((obj) => obj.id !== color.id);
-        updateColors(colorToDelete);
+        console.log(res.data);
+        updateColors(colors.filter((color) => color.id !== Number(res.data)));
       })
       .catch((err) => {
-        console.log(err);
+        console.log(err.response);
       });
   };
 
