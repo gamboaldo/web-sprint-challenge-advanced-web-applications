@@ -1,88 +1,77 @@
 import React, { useState, useEffect } from "react";
+import axiosWithAuth from "../helpers/axiosWithAuth";
 import { useHistory } from "react-router-dom";
-import axios from "axios";
-import styled from "styled-components";
 
-const Page = styled.div``;
-const Hello = styled.h1``;
-const LoginDiv = styled.form``;
-const Input = styled.input``;
-const SignIn = styled.button``;
-
-const initialState = {
+const initialFormValue = {
   username: "",
   password: "",
 };
-
 const Login = () => {
   // make a post request to retrieve a token from the api
   // when you have handled the token, navigate to the BubblePage route
-  const [user, setUser] = useState(initialState);
-
+  const [formValue, setFormValue] = useState(initialFormValue);
+  const [error, setError] = useState("");
   const { push } = useHistory();
+
   useEffect(() => {
     // make a post request to retrieve a token from the api
     // when you have handled the token, navigate to the BubblePage route
   });
 
-  const error = "Username or Password not valid.";
+  // const error = "";
+  //replace with error state
 
   const handleChange = (e) => {
-    setUser({
-      ...user,
-      [e.target.name]: e.target.value,
-    });
+    setFormValue({ ...formValue, [e.target.name]: e.target.value });
   };
 
-  const submitLogin = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    axios
-      .post("http://localhost:5000/api/login", user)
+    axiosWithAuth()
+      .post("/login", formValue)
       .then((res) => {
-        console.log(res.data.payload); // this is the token
         localStorage.setItem("token", res.data.payload);
-        push("/private-route");
+        setError("");
+        push("/BubblePage");
       })
       .catch((err) => {
-        console.log(err.response);
+        setError(err.response.data.error);
       });
+    setFormValue(initialFormValue);
   };
-
-  //replace with error state
 
   return (
     <div>
-      {/* <h1>Welcome to the Bubble App!</h1>
+      <h1>Welcome to the Bubble App!</h1>
       <div data-testid="loginForm" className="login-form">
-        <h2>Build login form here</h2>
+        <form onSubmit={handleSubmit}>
+          <label>
+            Username
+            <input
+              data-testid="username"
+              type="text"
+              value={formValue.username}
+              name="username"
+              onChange={handleChange}
+            />
+          </label>
+          <label>
+            Password
+            <input
+              data-testid="password"
+              type="password"
+              value={formValue.password}
+              name="password"
+              onChange={handleChange}
+            />
+          </label>
+          <button>Login</button>
+        </form>
       </div>
 
       <p data-testid="errorMessage" className="error">
         {error}
-      </p> */}
-      <Page>
-        <Hello>Hello. Sign in.</Hello>
-        <LoginDiv onSubmit={submitLogin}>
-          <Input
-            name="username"
-            type="text"
-            placeholder="username"
-            onChange={handleChange}
-            className="login-form"
-            data-testid="loginForm"
-          />
-          <Input
-            name="password"
-            type="password"
-            placeholder="password"
-            onChange={handleChange}
-            className="error"
-            data-testid="errorMessage"
-          />
-          <SignIn>Sign in</SignIn>
-        </LoginDiv>
-        {user.username === "" || (user.password === "" && <p>{error}</p>)}
-      </Page>
+      </p>
     </div>
   );
 };
